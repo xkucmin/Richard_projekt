@@ -46,10 +46,126 @@ from setuptools.command.sdist import sdist
 # porovnanie(5,5)
 
 
-fruits = ["apple", "banana", "cherry"]
+# fruits = ["apple", "banana", "cherry"]
+#
+# fruits.remove("apple")
+# fruits.insert(1, "peach")
+#
+# for x in fruits:
+#   print(x)
 
-fruits.remove("apple")
-fruits.insert(1, "peach")
+#Úloha 1: Deklarácia premenných a výpočet
+#Vytvor premenné x a y, priraď im hodnoty 10 a 20. Vypočítaj ich súčet a rozdiel a vypíš výsledky.
+from email.contentmanager import raw_data_manager
 
-for x in fruits:
-  print(x)
+from torch.cpu import is_available
+
+
+# x = 10
+# y = 20
+# sucet = x + y
+# rozdiel = x - y
+# print ("Súčet:",sucet)
+# print ("Rozdiel:",rozdiel)
+
+#Úloha 2: Základné operácie
+#Napíš program, ktorý vypočíta obsah obdĺžnika so stranami a = 5 a b = 7. Vypíš výsledok vo formáte:
+#Obsah obdĺžnika je: 35
+# a = 5
+# b = 7
+# sucin = 5 * 7
+# print ("Obsah obdĺžnika je :", sucin)
+
+#Úloha 3: Jednoduchá funkcia
+#Vytvor funkciu pozdrav(meno), ktorá vypíše pozdrav vo formáte:
+#Ahoj, (meno)!
+# def pozdrav(meno):
+#     print ("Ahoj,", meno,"!")
+
+#Úloha 4: Funkcia na matematickú operáciu
+#Napíš funkciu vynasob(a, b), ktorá vypočíta súčin dvoch čísel a vráti výsledok. Zavolaj túto funkciu pre a = 4 a b = 6 a vypíš výsledok.
+#Ak je výsledok záporný, pripocíta k výsledku císlo 100 a vráti vysledok
+# def vynasob (a, b):
+#     vysledok = a * b
+#     if vysledok < 0:
+#        vysledok = vysledok + 100
+#     return vysledok
+# a = 4
+# b = 6
+# vysledok = vynasob(a,b)
+# print("Výsledok je:", vysledok)
+
+#Úloha 5: Podmienky
+#Napíš funkciu porovnaj(a, b), ktorá porovná dve čísla:
+
+#Ak a je väčšie, vypíše: a je väčšie ako b.
+#Ak b je väčšie, vypíše: b je väčšie ako a.
+#Ak sú rovnaké, vypíše taký počet hviezdičiek, akú hodnotu má premenná a (alebo b, sú rovnaké).
+#Zavolaj túto funkciu napríklad s hodnotami 5 a 10.
+# def porovnaj (a, b):
+#     if a > b:
+#         print ("a je väčšie ako b")
+#     if a < b:
+#         print ("b je väčšie ako a")
+#     if a == b:
+#         print (a * "*")
+# a = 5
+# b = 10
+#
+# porovnaj(5,5)
+
+#Úloha 6: Cyklus a výpis
+#Vytvor funkciu hviezdicky(n), ktorá vypíše n riadkov hviezdičiek, pričom každý riadok obsahuje o jednu hviezdičku viac ako predchádzajúci.
+#Napríklad, pre n = 4 je vzorovy vysledok v sprave nizsie
+#Definícia funkcie hviezdicky
+# def hviezdicky(n):
+#     for i in range (n):  # tuto sa i zvacsuje od 0 do 3
+#         print ( (i+1) * "*")
+#
+# hviezdicky(4)
+#Úloha 7: Práca so zoznamom
+#Vytvor funkciu pridaj(ovocie), ktorá pridá ovocie na koniec zoznamu. Funkciu, ktorá to robí najdes na internete (bude podobna ako ta, ktoru sme pouzivali).
+# Polovica programovania je googlenie, tak nech si to uz vyskusas.
+#Vo funkcie budes mat zoznam ovocia:
+#fruits = ["apple", "banana", "cherry"]
+
+#Pokial funkciu zavolas pridaj(orange), a potom vypises tento zoznam po pridaní, mal by vyzerat:
+#fruits = ["apple", "banana", "cherry", "orange"]
+# fruits = ["apple", "banana", "cherry"]
+# def pridaj(ovocie):
+#         fruits.append(ovocie)
+#
+# pridaj("orange")
+# print(fruits)
+# pozdrav("Adam")
+# pozdrav("Richard")
+
+class Person:  #objekt clovek s 2 atributmi
+  def __init__(self, id, name, author, number_of_pages, available):
+    self.id = id  #malo by byt vzdy unikatne
+    self.name = name
+
+class Book:  #objekt clovek s 2 atributmi
+  def __init__(self, id, name, author, number_of_pages, available):
+    self.id = id  #malo by byt vzdy unikatne
+    self.name = name
+    self.author = author
+    self.number_of_pages = number_of_pages
+    self.available = available
+
+# spravit funkciu, ktora ma ako vstup vsetky knihy a my chceme vratit iba tie, ktore su dostupne
+def get_available_books(book_list):
+    available_books = []
+    for book in book_list:
+        if book.number_of_pages == 1000 and book.author != "richard":
+            available_books.append(book)
+            print(book.name)
+    return available_books
+
+book1 = Book(1, "book1", "adam", 100, True)
+book2 = Book(2, "book2", "richard", 1000, False)
+book3 = Book(3, "book3", "richard", 1000, True)
+book4 = Book(4, "book4", "adam", 100, False)
+
+books = [book1, book2, book3, book4]
+my_books = get_available_books(books)
