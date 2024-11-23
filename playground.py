@@ -140,32 +140,3 @@ from torch.cpu import is_available
 # pozdrav("Adam")
 # pozdrav("Richard")
 
-class Person:  #objekt clovek s 2 atributmi
-  def __init__(self, id, name, author, number_of_pages, available):
-    self.id = id  #malo by byt vzdy unikatne
-    self.name = name
-
-class Book:  #objekt clovek s 2 atributmi
-  def __init__(self, id, name, author, number_of_pages, available):
-    self.id = id  #malo by byt vzdy unikatne
-    self.name = name
-    self.author = author
-    self.number_of_pages = number_of_pages
-    self.available = available
-
-# spravit funkciu, ktora ma ako vstup vsetky knihy a my chceme vratit iba tie, ktore su dostupne
-def get_available_books(book_list):
-    available_books = []
-    for book in book_list:
-        if book.number_of_pages == 1000 and book.author != "richard":
-            available_books.append(book)
-            print(book.name)
-    return available_books
-
-book1 = Book(1, "book1", "adam", 100, True)
-book2 = Book(2, "book2", "richard", 1000, False)
-book3 = Book(3, "book3", "richard", 1000, True)
-book4 = Book(4, "book4", "adam", 100, False)
-
-books = [book1, book2, book3, book4]
-my_books = get_available_books(books)
