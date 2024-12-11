@@ -46,8 +46,8 @@ def assign_animal_to_keeper(animal, keeper, care_relations):
 keeper1 = Keeper(1, "Adam", 2015)
 keeper2 = Keeper(2, "Ema", 2018)
 
-animal1 = Animal(1, "Lev", "Lev")
-animal2 = Animal(2, "Opica", "Opica")
+animal1 = Animal(1, "Opica", "Opica")
+animal2 = Animal(2, "Lev", "Lev")
 
 care_relations = []
 
