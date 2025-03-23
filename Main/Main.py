@@ -1,12 +1,13 @@
-from entities.Kniha import Kniha
-from entities.Vypozicka import Vypozicka
-from entities.Autor import Autor
+from flask import Flask, request, jsonify
 from entities.Pouzivatel import Pouzivatel
+from entities.Autor import Autor
+from entities.Kniha import Kniha
 from functions.Funkcie import pridat_knihu, vypozicat_knihu, vratit_knihu
 
+app = Flask(__name__)
 
 pouzivatelia = [
-    Pouzivatel(1, "Jozef", "jozef@gmail.com"),
+    Pouzivatel (1, "Jozef", "jozef@gmail.com"),
     Pouzivatel(2, "Katka", "katka@gmail.com")
 ]
 
@@ -21,20 +22,45 @@ knihy = [
     Kniha(3, "Hamlet", 2)
 ]
 
-vypozicky = []
+@app.route('/pridat-knihu', methods=['POST'])
+def pridat_knihu_endpoint():
+    data = request.json
+    nazov = data.get('nazov')
+    autor_id = data.get('autor_id')
+
+    if not nazov or not autor_id:
+        return jsonify({"error": "Chýba 'nazov' alebo 'autor_id'"}), 400
+
+    kniha = pridat_knihu(nazov, autor_id)
+    return jsonify({"message": "Kniha pridaná", "kniha": kniha.__dict__})
 
 
-nova_kniha = pridat_knihu(knihy, "Nová Kniha", 1)
-print(f"Pridaná kniha: {nova_kniha.nazov}")
+@app.route('/vypozicat-knihu', methods=['POST'])
+def vypozicat_knihu_endpoint():
+    data = request.json
+    kniha_id = data.get('kniha_id')
+    pouzivatel_id = data.get('pouzivatel_id')
+
+    if not kniha_id or not pouzivatel_id:
+        return jsonify({"error": "Chýba 'kniha_id' alebo 'pouzivatel_id'"}), 400
+
+    if vypozicat_knihu(kniha_id, pouzivatel_id):
+        return jsonify({"message": "Kniha bola úspešne vypožičaná"})
+    return jsonify({"error": "Kniha nie je dostupná alebo neexistuje"}), 400
 
 
-if vypozicat_knihu(knihy, vypozicky, 1, 1):
-    print("Kniha úspešne vypožičaná.")
-else:
-    print("Kniha nie je dostupná.")
+@app.route('/vratit-knihu', methods=['POST'])
+def vratit_knihu_endpoint():
+    data = request.json
+    vypozicka_id = data.get('vypozicka_id')
+
+    if not vypozicka_id:
+        return jsonify({"error": "Chýba 'vypozicka_id'"}), 400
+
+    if vratit_knihu(vypozicka_id):
+        return jsonify({"message": "Kniha bola úspešne vrátená"})
+    return jsonify({"error": "Výpožička neexistuje alebo už bola vrátená"}), 400
 
 
-if vratit_knihu(knihy, vypozicky, 1):
-    print("Kniha bola úspešne vrátená.")
-else:
-    print("Chyba pri vrátení knihy.")
+if __name__ == '__main__':
+    app.run(debug=True)

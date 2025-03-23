@@ -14,15 +14,15 @@ def vypozicat_knihu(knihy, vypozicky, kniha_id, pouzivatel_id):
     for kniha in knihy:
         if kniha.id == kniha_id and kniha.dostupna:
             kniha.vypozicat()
-            nova_vypozicka = Vypozicka(len(vypozicky) + 1, kniha_id, pouzivatel_id)
+            nova_vypozicka = Vypozicka(len(vypozicky) + 1, kniha_id, pouzivatel_id,datetime.now)
             vypozicky.append(nova_vypozicka)
             return True
     return False
 
 def vratit_knihu(knihy, vypozicky, vypozicka_id):
     for vypozicka in vypozicky:
-        if vypozicka.id == vypozicka_id and not vypozicka.vratena:
-            vypozicka.vratit()
+        if vypozicka.id == vypozicka_id and vypozicka.datum_vratenia is None:
+            vypozicka.vratit(datetime.now())
             for kniha in knihy:
                 if kniha.id == vypozicka.kniha_id:
                     kniha.vratit()
