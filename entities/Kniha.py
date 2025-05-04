@@ -13,3 +13,11 @@ class Kniha:
 
     def vratit(self):
         self.dostupna = True
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "nazov": self.nazov,
+            "autor_id": self.autor_id,
+            "dostupna": self.dostupna
+        }
