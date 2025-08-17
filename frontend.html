@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knižničný systém</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #333;
+        }
+        input, button, select {
+            padding: 8px 12px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+        .error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+        .success {
+            background: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Knižničný systém</h1>
+
+    <!-- Pridať knihu -->
+    <div class="container">
+        <h2>Pridať knihu</h2>
+        <div class="form-group">
+            <label>Názov knihy:</label>
+            <input type="text" id="nazov-knihy" placeholder="Zadajte názov knihy">
+        </div>
+        <div class="form-group">
+            <label>ID autora:</label>
+            <input type="number" id="autor-id" placeholder="Zadajte ID autora">
+        </div>
+        <button onclick="pridatKnihu()">Pridať knihu</button>
+        <div id="result-pridat"></div>
+    </div>
+
+    <!-- Zobraziť knihy -->
+    <div class="container">
+        <h2>Všetky knihy</h2>
+        <button onclick="ziskatKnihy()">Načítať knihy</button>
+        <div id="result-knihy"></div>
+    </div>
+
+    <!-- Vypožičať knihu -->
+    <div class="container">
+        <h2>Vypožičať knihu</h2>
+        <div class="form-group">
+            <label>ID knihy:</label>
+            <input type="number" id="kniha-id-vypozicat" placeholder="Zadajte ID knihy">
+        </div>
+        <div class="form-group">
+            <label>ID používateľa:</label>
+            <input type="number" id="pouzivatel-id-vypozicat" placeholder="Zadajte ID používateľa">
+        </div>
+        <button onclick="vypozicatKnihu()">Vypožičať knihu</button>
+        <div id="result-vypozicat"></div>
+    </div>
+
+    <!-- Vrátiť knihu -->
+    <div class="container">
+        <h2>Vrátiť knihu</h2>
+        <div class="form-group">
+            <label>ID výpožičky:</label>
+            <input type="number" id="vypozicka-id" placeholder="Zadajte ID výpožičky">
+        </div>
+        <button onclick="vratitKnihu()">Vrátiť knihu</button>
+        <div id="result-vratit"></div>
+    </div>
+
+    <!-- Zobraziť výpožičky -->
+    <div class="container">
+        <h2>Všetky výpožičky</h2>
+        <button onclick="ziskatVypozicky()">Načítať výpožičky</button>
+        <div id="result-vypozicky"></div>
+    </div>
+
+
+        <!-- Zobraziť knihy -->
+    <div class="container">
+        <h2>Všetky knihy</h2>
+        <button onclick="ziskatAutorov()">Načítať autorov</button>
+        <div id="result-autori"></div>
+    </div>
+
+    <!-- Knihy podľa autora -->
+    <div class="container">
+        <h2>Knihy podľa autora</h2>
+        <div class="form-group">
+            <label>Meno autora:</label>
+            <input type="text" id="meno-autora" placeholder="Zadajte meno autora">
+        </div>
+        <button onclick="knihyPodlaAutora()">Vyhľadať</button>
+        <div id="result-autor"></div>
+    </div>
+
+    <!-- História výpožičiek knihy -->
+    <div class="container">
+        <h2>História výpožičiek knihy</h2>
+        <div class="form-group">
+            <label>ID knihy:</label>
+            <input type="number" id="kniha-id-historia" placeholder="Zadajte ID knihy">
+        </div>
+        <button onclick="historiaVypoziciek()">Zobraziť históriu</button>
+        <div id="result-historia"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+
+        function showResult(elementId, message, isError = false) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="result ${isError ? 'error' : 'success'}">${message}</div>`;
+        }
+
+        async function pridatKnihu() {
+            const nazov = document.getElementById('nazov-knihy').value;
+            const autorId = document.getElementById('autor-id').value;
+
+            if (!nazov || !autorId) {
+                showResult('result-pridat', 'Vyplňte všetky polia!', true);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/pridat-knihu`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({nazov: nazov, autor_id: parseInt(autorId)})
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showResult('result-pridat', `Kniha pridaná: ${data.kniha.nazov}`);
+                    document.getElementById('nazov-knihy').value = '';
+                    document.getElementById('autor-id').value = '';
+                } else {
+                    showResult('result-pridat', data.error, true);
+                }
+            } catch (error) {
+                showResult('result-pridat', 'Chyba komunikácie so serverom', true);
+            }
+        }
+
+        async function ziskatKnihy() {
+            try {
+                const response = await fetch(`${API_BASE}/ziskat-knihy`);
+                const knihy = await response.json();
+
+                if (response.ok) {
+                    let html = '<table><tr><th>ID</th><th>Názov</th><th>Autor ID</th><th>Dostupná</th></tr>';
+                    knihy.forEach(kniha => {
+                        html += `<tr><td>${kniha.id}</td><td>${kniha.nazov}</td><td>${kniha.autor}</td><td>${kniha.dostupna ? 'Áno' : 'Nie'}</td></tr>`;
+                    });
+                    html += '</table>';
+                    document.getElementById('result-knihy').innerHTML = html;
+                } else {
+                    showResult('result-knihy', 'Chyba pri načítaní kníh', true);
+                }
+            } catch (error) {
+                showResult('result-knihy', 'Chyba komunikácie so serverom', true);
+            }
+        }
+
+        async function ziskatAutorov() {
+            try {
+                const response = await fetch(`${API_BASE}/ziskat-autorov`);
+                const knihy = await response.json();
+
+                if (response.ok) {
+                    let html = '<table><tr><th>ID</th><th>Meno</th><th>Autor ID</th><th>Dostupná</th></tr>';
+                    knihy.forEach(kniha => {
+                        html += `<tr><td>${kniha.id}</td><td>${kniha.nazov}</td><td>${kniha.autor}</td><td>${kniha.dostupna ? 'Áno' : 'Nie'}</td></tr>`;
+                    });
+                    html += '</table>';
+                    document.getElementById('result-knihy').innerHTML = html;
+                } else {
+                    showResult('result-knihy', 'Chyba pri načítaní kníh', true);
+                }
+            } catch (error) {
+                showResult('result-knihy', 'Chyba komunikácie so serverom', true);
+            }
+        }
+
+        async function vypozicatKnihu() {
+            const knihaId = document.getElementById('kniha-id-vypozicat').value;
+            const pouzivatelId = document.getElementById('pouzivatel-id-vypozicat').value;
+
+            if (!knihaId || !pouzivatelId) {
+                showResult('result-vypozicat', 'Vyplňte všetky polia!', true);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/vypozicat-knihu`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({kniha_id: parseInt(knihaId), pouzivatel_id: parseInt(pouzivatelId)})
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showResult('result-vypozicat', data.message);
+                    document.getElementById('kniha-id-vypozicat').value = '';
+                    document.getElementById('pouzivatel-id-vypozicat').value = '';
+                } else {
+                    showResult('result-vypozicat', data.error, true);
+                }
+            } catch (error) {
+                showResult('result-vypozicat', 'Chyba komunikácie so serverom', true);
+            }
+        }
+
+        async function vratitKnihu() {
+            const vypozickaId = document.getElementById('vypozicka-id').value;
+
+            if (!vypozickaId) {
+                showResult('result-vratit', 'Zadajte ID výpožičky!', true);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/vratit-knihu`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({vypozicka_id: parseInt(vypozickaId)})
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showResult('result-vratit', data.message);
+                    document.getElementById('vypozicka-id').value = '';
+                } else {
+                    showResult('result-vratit', data.error, true);
+                }
+            } catch (error) {
+                showResult('result-vratit', 'Chyba komunikácie so serverom', true);
+            }
+        }
+
+        async function ziskatVypozicky() {
+            try {
+                const response = await fetch(`${API_BASE}/ziskat-vypozicky`);
+                const vypozicky = await response.json();
+
+                if (response.ok) {
+                    let html = '<table><tr><th>ID</th><th>Kniha ID</th><th>Používateľ ID</th><th>Dátum vypožičania</th><th>Dátum vrátenia</th></tr>';
+                    vypozicky.forEach(vypozicka => {
+                        html += `<tr><td>${vypozicka.id}</td><td>${vypozicka.kniha_id}</td><td>${vypozicka.pouzivatel_id}</td><td>${vypozicka.datum_vypozicky || 'N/A'}</td><td>${vypozicka.datum_vratenia || 'Nevrátená'}</td></tr>`;
+                    });
+                    html += '</table>';
+                    document.getElementById('result-vypozicky').innerHTML = html;
+                } else {
+                    showResult('result-vypozicky', 'Chyba pri načítaní výpožičiek', true);
+                }
+            } catch (error) {
+                showResult('result-vypozicky', 'Chyba komunikácie so serverom', true);
+            }
+        }
+
+        async function knihyPodlaAutora() {
+            const menoAutora = document.getElementById('meno-autora').value;
+
+            if (!menoAutora) {
+                showResult('result-autor', 'Zadajte meno autora!', true);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/knihy-podla-autora`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({meno_autora: menoAutora})
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    let html = `<h3>Knihy autora: ${data.autor}</h3>`;
+                    if (data.knihy.length > 0) {
+                        html += '<table><tr><th>ID</th><th>Názov</th><th>Dostupná</th></tr>';
+                        data.knihy.forEach(kniha => {
+                            html += `<tr><td>${kniha.id}</td><td>${kniha.nazov}</td><td>${kniha.dostupna ? 'Áno' : 'Nie'}</td></tr>`;
+                        });
+                        html += '</table>';
+                    } else {
+                        html += '<p>Žiadne knihy nenájdené.</p>';
+                    }
+                    document.getElementById('result-autor').innerHTML = html;
+                } else {
+                    showResult('result-autor', data.error, true);
+                }
+            } catch (error) {
+                showResult('result-autor', 'Chyba komunikácie so serverom', true);
+            }
+        }
+
+        async function historiaVypoziciek() {
+            const knihaId = document.getElementById('kniha-id-historia').value;
+
+            if (!knihaId) {
+                showResult('result-historia', 'Zadajte ID knihy!', true);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/historia-vypoziciek-knihy?kniha_id=${knihaId}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    if (data.length > 0) {
+                        let html = '<table><tr><th>Používateľ</th><th>Dátum vypožičania</th><th>Dátum vrátenia</th></tr>';
+                        data.forEach(historia => {
+                            html += `<tr><td>${historia.meno}</td><td>${historia.datum_vypozicky || 'N/A'}</td><td>${historia.datum_vratenia || 'Nevrátená'}</td></tr>`;
+                        });
+                        html += '</table>';
+                        document.getElementById('result-historia').innerHTML = html;
+                    } else {
+                        showResult('result-historia', 'Žiadna história výpožičiek pre túto knihu.');
+                    }
+                } else {
+                    showResult('result-historia', data.message || 'Chyba pri načítaní histórie', true);
+                }
+            } catch (error) {
+                showResult('result-historia', 'Chyba komunikácie so serverom', true);
+            }
+        }
+
+        // Načítať knihy pri načítaní stránky
+        window.onload = function() {
+            ziskatKnihy();
+        };
+    </script>
+</body>
+</html>

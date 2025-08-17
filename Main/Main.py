@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, make_response
+from flask_cors import CORS
 from entities.Pouzivatel import Pouzivatel
 from entities.Autor import Autor
 from entities.Kniha import Kniha
@@ -6,6 +7,7 @@ from entities.Vypozicka import Vypozicka
 from functions.Funkcie import pridat_knihu, vypozicat_knihu, vratit_knihu, ziskat_knihy_podla_autora, ziskat_historiu_vypoziciek_knihy, nacitaj_vypozicky_z_db
 
 app = Flask(__name__)
+CORS(app)
 
 import psycopg2
 
@@ -14,7 +16,7 @@ conn = psycopg2.connect(
     user="postgres",
     password="password",
     host="localhost",
-    port="5432"
+    port="5448"
 )
 
 cur = conn.cursor()
@@ -115,22 +117,26 @@ def ziskat_vypozicky_endpoint():
 
 @app.route('/ziskat-knihy', methods=['GET'])
 def ziskat_knihy():
-    vypozicky = nacitaj_vypozicky_z_db(cur)
-    knihy_data = []
+    try:
+        aktualne_knihy = load_books()
+        vypozicky = nacitaj_vypozicky_z_db(cur)
+        knihy_data = []
 
-    for kniha in knihy:
-        vypozicana = any(
-            v.kniha_id == kniha.id and v.datum_vratenia is None
-            for v in vypozicky
-        )
-        knihy_data.append({
-            "id": kniha.id,
-            "nazov": kniha.nazov,
-            "autor": kniha.autor,
-            "dostupna": not vypozicana
-        })
+        for kniha in aktualne_knihy:
+            vypozicana = any(
+                v.kniha_id == kniha.id and v.datum_vratenia is None
+                for v in vypozicky
+            )
+            knihy_data.append({
+                "id": kniha.id,
+                "nazov": kniha.nazov,
+                "autor": kniha.autor_id,
+                "dostupna": not vypozicana
+            })
 
-    return jsonify(knihy_data)
+        return jsonify(knihy_data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route('/knihy-podla-autora', methods=['POST'])
