@@ -134,13 +134,13 @@
         <div id="result-vypozicky"></div>
     </div>
 
-
-        <!-- Zobraziť knihy -->
+    <!-- Zobraziť autorov -->
     <div class="container">
-        <h2>Všetky knihy</h2>
+        <h2>Všetci autori</h2>
         <button onclick="ziskatAutorov()">Načítať autorov</button>
         <div id="result-autori"></div>
     </div>
+
 
     <!-- Knihy podľa autora -->
     <div class="container">
@@ -317,6 +317,27 @@
             }
         }
 
+        async function ziskatAutorov() {
+            try {
+                const response = await fetch(`${API_BASE}/ziskat-autorov`);
+                const autori = await response.json();
+
+                if (response.ok) {
+                    let html = '<table><tr><th>ID</th><th>Meno</th></tr>';
+                    autori.forEach(autor => {
+                        html += `<tr><td>${autor.id}</td><td>${autor.meno}</td></tr>`;
+                    });
+                    html += '</table>';
+                    document.getElementById('result-autori').innerHTML = html;
+                } else {
+                    showResult('result-autori', 'Chyba pri načítaní autorov', true);
+                }
+            } catch (error) {
+                showResult('result-autori', 'Chyba komunikácie so serverom', true);
+            }
+        }
+
+
         async function knihyPodlaAutora() {
             const menoAutora = document.getElementById('meno-autora').value;
 
@@ -387,6 +408,7 @@
         // Načítať knihy pri načítaní stránky
         window.onload = function() {
             ziskatKnihy();
+            ziskatAutorov();
         };
     </script>
 </body>

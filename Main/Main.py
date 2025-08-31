@@ -16,7 +16,7 @@ conn = psycopg2.connect(
     user="postgres",
     password="password",
     host="localhost",
-    port="5448"
+    port="5432"
 )
 
 cur = conn.cursor()
@@ -26,8 +26,13 @@ cur.execute("SELECT id, meno, email FROM pouzivatelia;")
 pouzivatelia = [Pouzivatel(*row) for row in cur.fetchall()]
 
 # Load authors
-cur.execute("SELECT id, meno FROM autori;")
-autori = [Autor(*row) for row in cur.fetchall()]
+#cur.execute("SELECT id, meno FROM autori;")
+#autori = [Autor(*row) for row in cur.fetchall()]
+
+def load_authors():
+    cur.execute("SELECT id, meno FROM autori;")
+    autori = [Autor(*row) for row in cur.fetchall()]
+    return autori
 
 # Load books
 def load_books():
@@ -168,6 +173,22 @@ def historia_vypoziciek_knihy_endpoint():
         return jsonify({"message": "Žiadna výpožička pre danú knihu"}), 404
 
     return jsonify(historia), 200
+
+@app.route('/ziskat-autorov', methods=['GET'])
+def ziskat_autorov():
+    try:
+        autori = load_authors()
+
+        autori_data = []
+        for autor in autori:
+            autori_data.append({
+                "id": autor.id,
+                "meno": autor.meno
+            })
+
+        return jsonify(autori_data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
